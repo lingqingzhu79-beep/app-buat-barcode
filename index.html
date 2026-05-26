@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generator QR Code Ujian - Pak Udin</title>
+    <style>
+        /* Tampilan di Layar (Browser) */
+        body { 
+            font-family: sans-serif; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            min-height: 100vh; 
+            margin: 0; 
+            background-color: #f0f2f5; 
+        }
+        .container { 
+            background: white; 
+            padding: 30px; 
+            border-radius: 15px; 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1); 
+            text-align: center; 
+            width: 90%; 
+            max-width: 400px; 
+        }
+        h2 { color: #1a73e8; margin-bottom: 20px; }
+        input { width: 100%; padding: 12px; margin-bottom: 15px; border: 2px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
+        #qrcode { margin-top: 10px; padding: 15px; background: #fff; display: inline-block; border: 1px solid #eee; border-radius: 10px; }
+        .instruction { font-size: 14px; color: #666; margin-top: 15px; }
+        button { background: #1a73e8; color: white; border: none; padding: 12px 20px; border-radius: 5px; cursor: pointer; font-size: 16px; margin-top: 10px; width: 100%; font-weight: bold;}
+        button:hover { background: #1557b0; }
+        
+        .print-header { display: none; margin-bottom: 15px; }
+        .print-header h3 { margin: 0; font-size: 28px; color: #000; text-transform: uppercase; }
+        .print-header p { margin: 5px 0 0 0; font-size: 18px; color: #333; font-weight: bold; }
+
+        /* PENGATURAN KHUSUS CETAK (PRINT) */
+        @media print {
+            /* Sembunyikan elemen yang tidak perlu dicetak */
+            .no-print { display: none; }
+
+            /* Paksa body untuk memenuhi seluruh halaman kertas */
+            html, body {
+                height: 100%;
+                margin: 0 !important;
+                padding: 0 !important;
+                background: white;
+            }
+
+            /* Gunakan flexbox untuk menaruh konten tepat di tengah kertas */
+            body {
+                display: flex;
+                justify-content: center; /* Tengah horizontal */
+                align-items: center;     /* Tengah vertikal */
+            }
+
+            .container {
+                box-shadow: none;
+                border: none;
+                width: 100%;
+                max-width: none;
+                background: transparent;
+            }
+
+            .print-header { 
+                display: block; 
+            }
+
+            #qrcode { 
+                border: none; 
+                padding: 0;
+            }
+
+            #qrcode img {
+                width: 300px; /* Ukuran QR code saat diprint bisa diperbesar di sini */
+                height: 300px;
+            }
+
+            .instruction {
+                font-size: 16px;
+                margin-top: 20px;
+                color: #000;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2 class="no-print">QR Code Ujian</h2>
+    
+    <div class="no-print">
+        <input type="text" id="mapelInput" placeholder="Nama Mata Pelajaran" oninput="updateDisplay()">
+        <input type="text" id="guruInput" placeholder="Nama Guru Pengampu" oninput="updateDisplay()">
+        <p style="margin: 0 0 10px 0; font-size: 14px; color: #666; text-align: left;">Link Google Form:</p>
+        <input type="text" id="urlInput" placeholder="https://forms.gle/..." oninput="updateDisplay()">
+        <button onclick="window.print()">CETAK SEKARANG</button>
+    </div>
+
+    <div id="printArea">
+        <div class="print-header" id="printHeader">
+            <h3 id="displayMapel"></h3>
+            <p id="displayGuru"></p>
+        </div>
+
+        <div id="qrcode">
+            <img id="qrImage" src="" alt="QR Code" style="display:none; width: 250px; height: 250px; margin: 0 auto;">
+            <p id="placeholderText" class="no-print">QR Code akan muncul di sini</p>
+        </div>
+
+        <p class="instruction" id="instructionText" style="display:none;">
+            Minta siswa scan kode di atas menggunakan kamera HP atau aplikasi <b>Aplikasi Ujian Bro</b>.
+        </p>
+    </div>
+</div>
+
+<script>
+    function updateDisplay() {
+        const url = document.getElementById('urlInput').value;
+        const mapel = document.getElementById('mapelInput').value;
+        const guru = document.getElementById('guruInput').value;
+
+        const qrImage = document.getElementById('qrImage');
+        const placeholderText = document.getElementById('placeholderText');
+        const printHeader = document.getElementById('printHeader');
+        const displayMapel = document.getElementById('displayMapel');
+        const displayGuru = document.getElementById('displayGuru');
+        const instructionText = document.getElementById('instructionText');
+
+        // Update teks judul dan guru
+        displayMapel.innerText = mapel;
+        displayGuru.innerText = guru ? "Guru: " + guru : "";
+
+        // Tampilkan/Sembunyikan Header
+        if (mapel.trim() !== "" || guru.trim() !== "") {
+            printHeader.style.display = "block";
+        } else {
+            printHeader.style.display = "none";
+        }
+
+        // Generate QR Code
+        if (url.trim() !== "") {
+            qrImage.src = "https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=" + encodeURIComponent(url);
+            qrImage.style.display = "block";
+            placeholderText.style.display = "none";
+            instructionText.style.display = "block";
+        } else {
+            qrImage.style.display = "none";
+            placeholderText.style.display = "block";
+            instructionText.style.display = "none";
+        }
+    }
+</script>
+
+</body>
+</html>
